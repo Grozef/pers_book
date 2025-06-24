@@ -1,0 +1,16 @@
+easy_admin:
+    entities:
+        - App\Entity\AstonishingVideo
+        - App\Entity\FiercePublisher
+        - App\Entity\StunningImage
+        - App\Entity\User
+        - App\Entity\UserInfo
+        - App\Entity\WonderfullBook
+    design:
+        menu:
+            - { entity: 'AstonishingVideo', label: 'Astonishing Videos' }
+            - { entity: 'FiercePublisher', label: 'Fierce Publishers' }
+            - { entity: 'StunningImage', label: 'Stunning Images' }
+            - { entity: 'User', label: 'Users' }
+            - { entity: 'UserInfo', label: 'User Infos' }
+            - { entity: 'WonderfullBook', label: 'Wonderful Books' }
