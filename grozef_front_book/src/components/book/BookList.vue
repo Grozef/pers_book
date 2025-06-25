@@ -1,25 +1,50 @@
-<!-- src/components/book/BookList.vue -->
 <template>
   <div>
     <h2>Livres</h2>
-    <b-alert v-if="Object.keys(errors).length" variant="danger" show>
+
+    <div v-if="Object.keys(errors).length" class="alert alert-danger">
       <ul>
-        <li v-for="(error, field) in errors" :key="field">{{ field }}: {{ error }}</li>
+        <li v-for="(error, field) in errors" :key="field">
+          {{ field }}: {{ error }}
+        </li>
       </ul>
-    </b-alert>
+    </div>
+
     <SearchBar @search="handleSearch" />
-    <b-table striped hover :items="bookStore.books" :fields="fields">
-      <template #cell(actions)="row">
-        <b-button size="sm" @click="editBook(row.item)" variant="primary">Modifier</b-button>
-        <b-button size="sm" @click="deleteBook(row.item.id)" variant="danger">Supprimer</b-button>
-      </template>
-    </b-table>
+
+    <table class="book-table">
+      <thead>
+        <tr>
+          <th v-for="field in fields" :key="field.key">{{ field.label }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="book in bookStore.books" :key="book.id">
+          <td>{{ book.id }}</td>
+          <td>{{ book.title }}</td>
+          <td>{{ book.authorFirstName }}</td>
+          <td>{{ book.authorLastName }}</td>
+          <td>{{ book.rating }}</td>
+          <td>{{ book.isPublic ? 'Oui' : 'Non' }}</td>
+          <td>{{ book.publishDate }}</td>
+          <td>{{ book.publisher }}</td>
+          <td>{{ book.isbn }}</td>
+          <td>
+            <button @click="editBook(book)">Modifier</button>
+            <button @click="deleteBook(book.id)">Supprimer</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
     <ThePagination
       v-model:currentPage="bookStore.pagination.current_page"
       :total-items="bookStore.pagination.total_items"
       :items-per-page="bookStore.pagination.items_per_page"
     />
-    <b-button @click="showCreateModal" variant="success">Ajouter un livre</b-button>
+
+    <button @click="showCreateModal" class="create-btn">Ajouter un livre</button>
+
     <BookForm
       v-if="showModal"
       :book="selectedBook"
@@ -29,91 +54,114 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, computed, onMounted } from 'vue'
 import { useAppStore } from '@/stores/appStore'
 import { useBookStore } from '@/stores/bookStore'
 import SearchBar from '@/components/common/SearchBar.vue'
 import ThePagination from '@/components/common/ThePagination.vue'
 import BookForm from './BookForm.vue'
 
-export default {
-  components: { SearchBar, ThePagination, BookForm },
-  setup() {
-    const appStore = useAppStore()
-    const bookStore = useBookStore()
-    return { appStore, bookStore }
-  },
-  data() {
-    return {
-      showModal: false,
-      selectedBook: null,
-      fields: [
-        { key: 'id', label: 'ID' },
-        { key: 'title', label: 'Titre' },
-        { key: 'authorFirstName', label: 'Prénom auteur' },
-        { key: 'authorLastName', label: 'Nom auteur' },
-        { key: 'rating', label: 'Note' },
-        { key: 'isPublic', label: 'Public' },
-        { key: 'publishDate', label: 'Date de publication' },
-        { key: 'publisher', label: 'Éditeur' },
-        { key: 'isbn', label: 'ISBN' },
-        { key: 'actions', label: 'Actions' }
-      ]
-    }
-  },
-  computed: {
-    errors() {
-      return this.appStore.errors
-    }
-  },
-  async mounted() {
-    const result = await this.bookStore.fetchBooks()
+const appStore = useAppStore()
+const bookStore = useBookStore()
+
+const showModal = ref(false)
+const selectedBook = ref(null)
+
+const fields = [
+  { key: 'id', label: 'ID' },
+  { key: 'title', label: 'Titre' },
+  { key: 'authorFirstName', label: 'Prénom auteur' },
+  { key: 'authorLastName', label: 'Nom auteur' },
+  { key: 'rating', label: 'Note' },
+  { key: 'isPublic', label: 'Public' },
+  { key: 'publishDate', label: 'Date de publication' },
+  { key: 'publisher', label: 'Éditeur' },
+  { key: 'isbn', label: 'ISBN' },
+  { key: 'actions', label: 'Actions' }
+]
+
+const errors = computed(() => appStore.errors)
+
+const handleSearch = async (search) => {
+  bookStore.setSearch(search)
+  await fetchBooks()
+}
+
+const fetchBooks = async () => {
+  const result = await bookStore.fetchBooks()
+  if (!result.success) {
+    appStore.setErrors(result.error)
+  }
+}
+
+const showCreateModal = () => {
+  selectedBook.value = null
+  showModal.value = true
+}
+
+const editBook = (book) => {
+  selectedBook.value = { ...book }
+  showModal.value = true
+}
+
+const saveBook = async (book) => {
+  const result = selectedBook.value
+    ? await bookStore.updateBook(selectedBook.value.id, book)
+    : await bookStore.createBook(book)
+
+  if (result.success) {
+    closeModal()
+  } else {
+    appStore.setErrors(result.error)
+  }
+}
+
+const deleteBook = async (id) => {
+  if (confirm('Confirmer la suppression ?')) {
+    const result = await bookStore.deleteBook(id)
     if (!result.success) {
-      this.appStore.setErrors(result.error)
-    }
-  },
-  methods: {
-    handleSearch(search) {
-      this.bookStore.setSearch(search)
-      this.fetchBooks()
-    },
-    async fetchBooks() {
-      const result = await this.bookStore.fetchBooks()
-      if (!result.success) {
-        this.appStore.setErrors(result.error)
-      }
-    },
-    showCreateModal() {
-      this.selectedBook = null
-      this.showModal = true
-    },
-    editBook(book) {
-      this.selectedBook = { ...book }
-      this.showModal = true
-    },
-    async saveBook(book) {
-      const result = this.selectedBook
-        ? await this.bookStore.updateBook(this.selectedBook.id, book)
-        : await this.bookStore.createBook(book)
-      if (result.success) {
-        this.closeModal()
-      } else {
-        this.appStore.setErrors(result.error)
-      }
-    },
-    async deleteBook(id) {
-      if (confirm('Confirmer la suppression ?')) {
-        const result = await this.bookStore.deleteBook(id)
-        if (!result.success) {
-          this.appStore.setErrors(result.error)
-        }
-      }
-    },
-    closeModal() {
-      this.showModal = false
-      this.selectedBook = null
-      this.appStore.clearErrors()
+      appStore.setErrors(result.error)
     }
   }
 }
+
+const closeModal = () => {
+  showModal.value = false
+  selectedBook.value = null
+  appStore.clearErrors()
+}
+
+onMounted(fetchBooks)
 </script>
+
+<style scoped>
+.alert {
+  background-color: #f8d7da;
+  border: 1px solid #f5c2c7;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  color: #842029;
+  border-radius: 4px;
+}
+.book-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+.book-table th,
+.book-table td {
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+}
+.book-table th {
+  background-color: #f2f2f2;
+}
+button {
+  margin-right: 0.5rem;
+  padding: 0.4rem 0.8rem;
+}
+.create-btn {
+  margin-top: 1rem;
+}
+</style>

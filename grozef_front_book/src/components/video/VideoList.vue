@@ -2,24 +2,47 @@
 <template>
   <div>
     <h2>Vidéos</h2>
-    <b-alert v-if="Object.keys(errors).length" variant="danger" show>
+
+    <div v-if="Object.keys(errors).length" class="alert alert-danger">
       <ul>
         <li v-for="(error, field) in errors" :key="field">{{ field }}: {{ error }}</li>
       </ul>
-    </b-alert>
+    </div>
+
     <SearchBar @search="handleSearch" />
-    <b-table striped hover :items="videoStore.videos" :fields="fields">
-      <template #cell(actions)="row">
-        <b-button size="sm" @click="editVideo(row.item)" variant="primary">Modifier</b-button>
-        <b-button size="sm" @click="deleteVideo(row.item.id)" variant="danger">Supprimer</b-button>
-      </template>
-    </b-table>
+
+    <table class="table table-striped table-hover">
+      <thead>
+        <tr>
+          <th v-for="field in fields" :key="field.key">{{ field.label }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="video in videoStore.videos" :key="video.id">
+          <td>{{ video.id }}</td>
+          <td>{{ video.title }}</td>
+          <td>{{ video.authorFirstName }}</td>
+          <td>{{ video.authorLastName }}</td>
+          <td>{{ video.rating }}</td>
+          <td>{{ video.isPublic ? 'Oui' : 'Non' }}</td>
+          <td>{{ video.publishDate }}</td>
+          <td>{{ video.publisher }}</td>
+          <td>
+            <button class="btn btn-sm btn-primary" @click="editVideo(video)">Modifier</button>
+            <button class="btn btn-sm btn-danger" @click="deleteVideo(video.id)">Supprimer</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
     <ThePagination
       v-model:currentPage="videoStore.pagination.current_page"
       :total-items="videoStore.pagination.total_items"
       :items-per-page="videoStore.pagination.items_per_page"
     />
-    <b-button @click="showCreateModal" variant="success">Ajouter une vidéo</b-button>
+
+    <button class="btn btn-success" @click="showCreateModal">Ajouter une vidéo</button>
+
     <VideoForm
       v-if="showModal"
       :video="selectedVideo"
@@ -116,3 +139,70 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+}
+
+.table th,
+.table td {
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+.table-striped tbody tr:nth-child(odd) {
+  background-color: #f9f9f9;
+}
+
+.table-hover tbody tr:hover {
+  background-color: #f1f1f1;
+}
+
+.btn {
+  padding: 0.25em 0.5em;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: white;
+  margin-right: 0.3rem;
+}
+
+.btn-primary {
+  background-color: #007bff;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+}
+
+.btn-danger {
+  background-color: #dc3545;
+}
+
+.btn-danger:hover {
+  background-color: #a71d2a;
+}
+
+.btn-success {
+  background-color: #28a745;
+  padding: 0.4em 0.8em;
+}
+
+.btn-success:hover {
+  background-color: #1c7430;
+}
+
+.alert {
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 4px;
+  color: #721c24;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+}
+</style>

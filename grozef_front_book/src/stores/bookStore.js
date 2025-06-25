@@ -1,6 +1,6 @@
 // src/stores/bookStore.js
 import { defineStore } from 'pinia'
-import api from '@/services/api'
+import api from '/services/api.js'
 
 export const useBookStore = defineStore('book', {
   state: () => ({

@@ -1,6 +1,6 @@
 // src/stores/publisherStore.js
 import { defineStore } from 'pinia'
-import api from '@/services/api'
+import api from '/services/api.js'
 
 export const usePublisherStore = defineStore('publisher', {
   state: () => ({

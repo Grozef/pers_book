@@ -1,25 +1,47 @@
-<!-- src/components/image/ImageList.vue -->
 <template>
   <div>
     <h2>Images</h2>
-    <b-alert v-if="Object.keys(errors).length" variant="danger" show>
+
+    <div v-if="Object.keys(errors).length" class="alert alert-danger">
       <ul>
         <li v-for="(error, field) in errors" :key="field">{{ field }}: {{ error }}</li>
       </ul>
-    </b-alert>
+    </div>
+
     <SearchBar @search="handleSearch" />
-    <b-table striped hover :items="imageStore.images" :fields="fields">
-      <template #cell(actions)="row">
-        <b-button size="sm" @click="editImage(row.item)" variant="primary">Modifier</b-button>
-        <b-button size="sm" @click="deleteImage(row.item.id)" variant="danger">Supprimer</b-button>
-      </template>
-    </b-table>
+
+    <table class="table">
+      <thead>
+        <tr>
+          <th v-for="field in fields" :key="field.key">{{ field.label }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="image in imageStore.images" :key="image.id">
+          <td>{{ image.id }}</td>
+          <td>{{ image.title }}</td>
+          <td>{{ image.authorFirstName }}</td>
+          <td>{{ image.authorLastName }}</td>
+          <td>{{ image.rating }}</td>
+          <td>{{ image.isPublic ? 'Oui' : 'Non' }}</td>
+          <td>{{ image.publishDate }}</td>
+          <td>{{ image.publisher }}</td>
+          <td>
+            <button class="btn btn-primary btn-sm" @click="editImage(image)">Modifier</button>
+            <button class="btn btn-danger btn-sm" @click="deleteImage(image.id)">Supprimer</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
     <ThePagination
       v-model:currentPage="imageStore.pagination.current_page"
       :total-items="imageStore.pagination.total_items"
       :items-per-page="imageStore.pagination.items_per_page"
     />
-    <b-button @click="showCreateModal" variant="success">Ajouter une image</b-button>
+
+    <button class="btn btn-success" @click="showCreateModal">Ajouter une image</button>
+
     <ImageForm
       v-if="showModal"
       :image="selectedImage"
@@ -116,3 +138,60 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+}
+.table th, .table td {
+  border: 1px solid #ddd;
+  padding: 0.5rem;
+  text-align: left;
+}
+.table th {
+  background-color: #f4f4f4;
+}
+.btn {
+  cursor: pointer;
+  border: none;
+  border-radius: 4px;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.875rem;
+  margin-right: 0.3rem;
+  color: white;
+}
+.btn-sm {
+  font-size: 0.75rem;
+  padding: 0.2rem 0.4rem;
+}
+.btn-primary {
+  background-color: #007bff;
+}
+.btn-primary:hover {
+  background-color: #0056b3;
+}
+.btn-danger {
+  background-color: #dc3545;
+}
+.btn-danger:hover {
+  background-color: #a71d2a;
+}
+.btn-success {
+  background-color: #28a745;
+  margin-top: 1rem;
+}
+.btn-success:hover {
+  background-color: #1e7e34;
+}
+.alert {
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+.alert-danger {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+</style>
