@@ -19,7 +19,7 @@ class UserTest extends TestCase
     public function testInitialState(): void
     {
         $this->assertNull($this->user->getId());
-        $this->assertNull($this->user->getMail());
+        $this->assertNull($this->user->getEmail());
         $this->assertNull($this->user->getPassword());
         $this->assertNull($this->user->isActive());
         $this->assertNull($this->user->getUserInfo());
@@ -27,8 +27,8 @@ class UserTest extends TestCase
 
     public function testSetAndGetMail(): void
     {
-        $this->user->setMail('test@example.com');
-        $this->assertSame('test@example.com', $this->user->getMail());
+        $this->user->setEmail('test@example.com');
+        $this->assertSame('test@example.com', $this->user->getEmail());
     }
 
     public function testSetAndGetPassword(): void

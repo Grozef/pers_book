@@ -10,6 +10,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 /**
  * Controller for managing User entities.
@@ -19,11 +21,19 @@ class UserController extends AbstractController
 {
     private UserRepository $userRepository;
     private EntityManagerInterface $entityManager;
+    private ValidatorInterface $validator;
+    private UserPasswordHasherInterface $passwordHasher;
 
-    public function __construct(UserRepository $userRepository, EntityManagerInterface $entityManager)
-    {
+    public function __construct(
+        UserRepository $userRepository,
+        EntityManagerInterface $entityManager,
+        ValidatorInterface $validator,
+        UserPasswordHasherInterface $passwordHasher
+    ) {
         $this->userRepository = $userRepository;
         $this->entityManager = $entityManager;
+        $this->validator = $validator;
+        $this->passwordHasher = $passwordHasher;
     }
 
     /**
@@ -37,20 +47,41 @@ class UserController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
 
-        $user = new User();
-        $user->setMail($data['mail']);
-        $user->setPassword($data['password']);
-        $user->setIsActive($data['isActive']);
+        if (!is_array($data)) {
+            return new JsonResponse(['error' => 'Invalid JSON data'], JsonResponse::HTTP_BAD_REQUEST);
+        }
 
         $userInfo = new UserInfo();
-        $userInfo->setFirstName($data['firstName']);
-        $userInfo->setLastName($data['lastName']);
-        $userInfo->setAddress($data['address']);
-        $userInfo->setTel($data['tel']);
-        $userInfo->setPostalCode($data['postalCode']);
-        $userInfo->setCountry($data['country']);
+        $userInfo->setFirstName($data['firstName'] ?? '');
+        $userInfo->setLastName($data['lastName'] ?? '');
+        $userInfo->setAddress($data['address'] ?? null);
+        $userInfo->setTel($data['tel'] ?? null);
+        $userInfo->setPostalCode($data['postalCode'] ?? null);
+        $userInfo->setCountry($data['country'] ?? null);
 
+        $user = new User();
+        $user->setEmail($data['email'] ?? '');
+        $user->setPassword(isset($data['password']) ? $this->passwordHasher->hashPassword($user, $data['password']) : '');
+        $user->setIsActive($data['isActive'] ?? false);
         $user->setUserInfo($userInfo);
+
+        $errors = $this->validator->validate($user);
+        if (count($errors) > 0) {
+            $errorMessages = [];
+            foreach ($errors as $error) {
+                $errorMessages[$error->getPropertyPath()] = $error->getMessage();
+            }
+            return new JsonResponse(['errors' => $errorMessages], JsonResponse::HTTP_BAD_REQUEST);
+        }
+
+        $errors = $this->validator->validate($userInfo);
+        if (count($errors) > 0) {
+            $errorMessages = [];
+            foreach ($errors as $error) {
+                $errorMessages[$error->getPropertyPath()] = $error->getMessage();
+            }
+            return new JsonResponse(['errors' => $errorMessages], JsonResponse::HTTP_BAD_REQUEST);
+        }
 
         $this->entityManager->persist($userInfo);
         $this->entityManager->persist($user);
@@ -78,7 +109,7 @@ class UserController extends AbstractController
         foreach ($paginator as $user) {
             $data[] = [
                 'id' => $user->getId(),
-                'mail' => $user->getMail(),
+                'email' => $user->getEmail(),
                 'isActive' => $user->isActive(),
                 'userInfo' => [
                     'firstName' => $user->getUserInfo()->getFirstName(),
@@ -91,7 +122,15 @@ class UserController extends AbstractController
             ];
         }
 
-        return new JsonResponse($data);
+        return new JsonResponse([
+            'data' => $data,
+            'pagination' => [
+                'current_page' => $page,
+                'total_pages' => ceil($paginator->count() / $limit),
+                'total_items' => $paginator->count(),
+                'items_per_page' => $limit,
+            ],
+        ]);
     }
 
     /**
@@ -105,27 +144,52 @@ class UserController extends AbstractController
     public function update(Request $request, int $id): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
+
+        if (!is_array($data)) {
+            return new JsonResponse(['error' => 'Invalid JSON data'], JsonResponse::HTTP_BAD_REQUEST);
+        }
+
         $user = $this->entityManager->getRepository(User::class)->find($id);
 
         if (!$user) {
             return new JsonResponse(['error' => 'User not found'], JsonResponse::HTTP_NOT_FOUND);
         }
 
-        $user->setMail($data['mail']);
-        $user->setPassword($data['password']);
-        $user->setIsActive($data['isActive']);
+        $user->setEmail($data['email'] ?? $user->getEmail());
+        if (isset($data['password'])) {
+            $user->setPassword($this->passwordHasher->hashPassword($user, $data['password']));
+        }
+        $user->setIsActive($data['isActive'] ?? $user->isActive());
 
         $userInfo = $user->getUserInfo();
-        $userInfo->setFirstName($data['firstName']);
-        $userInfo->setLastName($data['lastName']);
-        $userInfo->setAddress($data['address']);
-        $userInfo->setTel($data['tel']);
-        $userInfo->setPostalCode($data['postalCode']);
-        $userInfo->setCountry($data['country']);
+        $userInfo->setFirstName($data['firstName'] ?? $userInfo->getFirstName());
+        $userInfo->setLastName($data['lastName'] ?? $userInfo->getLastName());
+        $userInfo->setAddress($data['address'] ?? $userInfo->getAddress());
+        $userInfo->setTel($data['tel'] ?? $userInfo->getTel());
+        $userInfo->setPostalCode($data['postalCode'] ?? $userInfo->getPostalCode());
+        $userInfo->setCountry($data['country'] ?? $userInfo->getCountry());
+
+        $errors = $this->validator->validate($user);
+        if (count($errors) > 0) {
+            $errorMessages = [];
+            foreach ($errors as $error) {
+                $errorMessages[$error->getPropertyPath()] = $error->getMessage();
+            }
+            return new JsonResponse(['errors' => $errorMessages], JsonResponse::HTTP_BAD_REQUEST);
+        }
+
+        $errors = $this->validator->validate($userInfo);
+        if (count($errors) > 0) {
+            $errorMessages = [];
+            foreach ($errors as $error) {
+                $errorMessages[$error->getPropertyPath()] = $error->getMessage();
+            }
+            return new JsonResponse(['errors' => $errorMessages], JsonResponse::HTTP_BAD_REQUEST);
+        }
 
         $this->entityManager->flush();
 
-        return new JsonResponse(['status' => 'User updated!']);
+        return new JsonResponse(['status' => 'User updated!'], JsonResponse::HTTP_OK);
     }
 
     /**
@@ -146,6 +210,6 @@ class UserController extends AbstractController
         $this->entityManager->remove($user);
         $this->entityManager->flush();
 
-        return new JsonResponse(['status' => 'User deleted!']);
+        return new JsonResponse(['status' => 'User deleted!'], JsonResponse::HTTP_OK);
     }
 }

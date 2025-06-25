@@ -47,7 +47,7 @@
 //         $this->assertGreaterThan(0, count($users), 'No users found in database');
 
 //         foreach ($users as $user) {
-//             $this->assertNotNull($user->getMail(), 'User mail should not be null');
+//             $this->assertNotNull($user->getEmail(), 'User email should not be null');
 //             $this->assertNotNull($user->getPassword(), 'User password should not be null');
 //             $this->assertNotNull($user->getUserInfo(), 'User should have associated UserInfo');
 //             $this->assertNotNull($user->getUserInfo()->getFirstName(), 'UserInfo firstName should not be null');
@@ -140,7 +140,7 @@
 //         $userInfo->setLastName('Smith');
 
 //         $user = new User();
-//         $user->setMail('alice@example.com');
+//         $user->setEmail('alice@example.com');
 //         $user->setPassword('secret123');
 //         $user->setIsActive(true);
 //         $user->setUserInfo($userInfo);
@@ -148,7 +148,7 @@
 //         $this->entityManager->persist($user);
 //         $this->entityManager->flush();
 
-//         $retrievedUser = $this->entityManager->getRepository(User::class)->findOneBy(['mail' => 'alice@example.com']);
+//         $retrievedUser = $this->entityManager->getRepository(User::class)->findOneBy(['email' => 'alice@example.com']);
 //         $this->assertNotNull($retrievedUser, 'User should be persisted');
 //         $this->assertNotNull($retrievedUser->getUserInfo(), 'User should have associated UserInfo');
 //         $this->assertSame('Alice', $retrievedUser->getUserInfo()->getFirstName());

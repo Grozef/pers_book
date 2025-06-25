@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\DataFixtures;
@@ -12,63 +13,76 @@ use App\Entity\WonderfullBook;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use Faker\Factory;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class AppFixtures extends Fixture
 {
+    private UserPasswordHasherInterface $passwordHasher;
+
+    public function __construct(UserPasswordHasherInterface $passwordHasher)
+    {
+        $this->passwordHasher = $passwordHasher;
+    }
+
     public function load(ObjectManager $manager): void
     {
-        $faker = Factory::create();
+        $faker = Factory::create('fr_FR');
 
-        // Create publishers
-        $publishers = [];
-        for ($i = 0; $i < 10; $i++) {
-            $publisher = new FiercePublisher();
-            $publisher->setName($faker->company);
-            $publisher->setAddress($faker->address);
-            $publisher->setTel($faker->phoneNumber);
-            $publisher->setMail($faker->email);
-            $publisher->setPostalCode($faker->postcode);
-            $publisher->setCountry($faker->country);
-            $publishers[] = $publisher;
-            $manager->persist($publisher);
-        }
-
-        // Create users
+        // Créer des utilisateurs avec leurs UserInfo
         $users = [];
         for ($i = 0; $i < 5; $i++) {
             $userInfo = new UserInfo();
-            $userInfo->setFirstName($faker->firstName);
-            $userInfo->setLastName($faker->lastName);
-            $userInfo->setAddress($faker->address);
-            $userInfo->setTel($faker->phoneNumber);
-            $userInfo->setPostalCode($faker->postcode);
-            $userInfo->setCountry($faker->country);
+            $userInfo
+                ->setFirstName($faker->firstName())
+                ->setLastName($faker->lastName())
+                ->setAddress($faker->streetAddress())
+                ->setTel($faker->phoneNumber())
+                ->setPostalCode($faker->postcode())
+                ->setCountry($faker->country());
 
             $user = new User();
-            $user->setMail($faker->email);
-            $user->setPassword($faker->password(8, 255)); // Unhashed password
-            $user->setIsActive($faker->boolean(80));
-            $user->setUserInfo($userInfo);
+            $user
+                ->setEmail($faker->email())
+                ->setPassword($this->passwordHasher->hashPassword($user, 'password123'))
+                ->setIsActive($faker->boolean(80))
+                ->setUserInfo($userInfo);
 
             $users[] = $user;
             $manager->persist($userInfo);
             $manager->persist($user);
         }
 
-        // Create videos
+        // Créer des éditeurs
+        $publishers = [];
+        for ($i = 0; $i < 10; $i++) {
+            $publisher = new FiercePublisher();
+            $publisher
+                ->setName($faker->company())
+                ->setAddress($faker->streetAddress())
+                ->setTel($faker->phoneNumber())
+                ->setEmail($faker->companyEmail())
+                ->setPostalCode($faker->postcode())
+                ->setCountry($faker->country());
+
+            $publishers[] = $publisher;
+            $manager->persist($publisher);
+        }
+
+        // Créer des vidéos
         for ($i = 0; $i < 20; $i++) {
             $video = new AstonishingVideo();
-            $video->setTitle($faker->sentence(2));
-            $video->setAuthorFirstName($faker->firstName);
-            $video->setAuthorLastName($faker->lastName);
-            $video->setRating($faker->numberBetween(0, 5));
-            $video->setIsPublic($faker->boolean(70));
-            $video->setPublishDate($faker->dateTimeThisDecade);
-            $video->setPublisher($faker->company);
-            $video->setFilepath(sprintf('/videos/%s.mp4', $faker->slug));
+            $video
+                ->setTitle($faker->sentence(3))
+                ->setAuthorFirstName($faker->firstName())
+                ->setAuthorLastName($faker->lastName())
+                ->setRating($faker->numberBetween(1, 5))
+                ->setIsPublic($faker->boolean(70))
+                ->setPublishDate($faker->dateTimeThisDecade())
+                ->setPublisher($faker->company())
+                ->setFilepath('/videos/' . $faker->uuid() . '.mp4');
 
-            // Associate 1 or 2 random publishers
-            $randomPublishers = $faker->randomElements($publishers, $faker->numberBetween(1, 2));
+            // Associer 1 à 3 éditeurs aléatoires
+            $randomPublishers = $faker->randomElements($publishers, $faker->numberBetween(1, 3));
             foreach ($randomPublishers as $publisher) {
                 $video->addFiercePublisher($publisher);
             }
@@ -76,21 +90,22 @@ class AppFixtures extends Fixture
             $manager->persist($video);
         }
 
-        // Create images
+        // Créer des images
         for ($i = 0; $i < 20; $i++) {
             $image = new StunningImage();
-            $image->setTitle($faker->sentence(2));
-            $image->setAuthorFirstName($faker->firstName());
-            $image->setAuthorLastName($faker->lastName());
-            $image->setRating($faker->numberBetween(0, 5));
-            $image->setIsPublic($faker->boolean(70));
-            $image->setPrice($faker->randomFloat(2, 5, 100));
-            $image->setPublishedDate($faker->dateTimeThisDecade());
-            $image->setPublisher($faker->company());
-            $image->setFilepath(sprintf('/images/%s.jpg', $faker->slug()));
+            $image
+                ->setTitle($faker->sentence(3))
+                ->setAuthorFirstName($faker->firstName())
+                ->setAuthorLastName($faker->lastName())
+                ->setRating($faker->numberBetween(1, 5))
+                ->setIsPublic($faker->boolean(70))
+                ->setPrice($faker->randomFloat(2, 5, 100))
+                ->setPublishedDate($faker->dateTimeThisDecade())
+                ->setPublisher($faker->company())
+                ->setFilepath('/images/' . $faker->uuid() . '.jpg');
 
-            // Associate 1 or 2 random publishers
-            $randomPublishers = $faker->randomElements($publishers, $faker->numberBetween(1, 2));
+            // Associer 1 à 3 éditeurs aléatoires
+            $randomPublishers = $faker->randomElements($publishers, $faker->numberBetween(1, 3));
             foreach ($randomPublishers as $publisher) {
                 $image->addFiercePublisher($publisher);
             }
@@ -98,22 +113,23 @@ class AppFixtures extends Fixture
             $manager->persist($image);
         }
 
-        // Create books
+        // Créer des livres
         for ($i = 0; $i < 20; $i++) {
             $book = new WonderfullBook();
-            $book->setTitle($faker->sentence(2));
-            $book->setAuthorFirstName($faker->firstName);
-            $book->setAuthorLastName($faker->lastName);
-            $book->setRating($faker->numberBetween(0, 5));
-            $book->setIsPublic($faker->boolean(70));
-            $book->setPrice($faker->randomFloat(2, 5, 50));
-            $book->setPublishedDate($faker->dateTimeThisDecade);
-            $book->setGenre($faker->word);
-            $book->setPublisher($faker->company);
-            $book->setIsbn($faker->isbn13);
+            $book
+                ->setTitle($faker->sentence(3))
+                ->setAuthorFirstName($faker->firstName())
+                ->setAuthorLastName($faker->lastName())
+                ->setRating($faker->numberBetween(1, 5))
+                ->setIsPublic($faker->boolean(70))
+                ->setPrice($faker->randomFloat(2, 10, 50))
+                ->setPublishedDate($faker->dateTimeThisDecade())
+                ->setGenre($faker->randomElement(['Fiction', 'Non-fiction', 'Science-fiction', 'Fantasy', 'Biography']))
+                ->setPublisher($faker->company())
+                ->setIsbn($faker->isbn13());
 
-            // Associate 1 or 2 random publishers
-            $randomPublishers = $faker->randomElements($publishers, $faker->numberBetween(1, 2));
+            // Associer 1 à 3 éditeurs aléatoires
+            $randomPublishers = $faker->randomElements($publishers, $faker->numberBetween(1, 3));
             foreach ($randomPublishers as $publisher) {
                 $book->addFiercePublisher($publisher);
             }
@@ -121,7 +137,6 @@ class AppFixtures extends Fixture
             $manager->persist($book);
         }
 
-        // Save all entities
         $manager->flush();
     }
 }

@@ -27,14 +27,15 @@ class UserRepository extends ServiceEntityRepository
      */
     public function findWithPaginationAndSearch(int $page, int $limit, ?string $searchTerm = null): Paginator
     {
-        $queryBuilder = $this->createQueryBuilder('u');
+        $queryBuilder = $this->createQueryBuilder('u')
+                             ->join('u.userInfo', 'ui');
 
         if ($searchTerm) {
             $queryBuilder
-                ->where('u.mail LIKE :searchTerm')
-                ->orWhere('u.userInfo.firstName LIKE :searchTerm')
-                ->orWhere('u.userInfo.lastName LIKE :searchTerm')
-                ->setParameter('searchTerm', '%' . $searchTerm . '%');
+                ->where('LOWER(u.email) LIKE LOWER(:searchTerm)')
+                ->orWhere('LOWER(ui.firstName) LIKE LOWER(:searchTerm)')
+                ->orWhere('LOWER(ui.lastName) LIKE LOWER(:searchTerm)')
+                ->setParameter('searchTerm', '%' . strtolower($searchTerm) . '%');
         }
 
         $queryBuilder

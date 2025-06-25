@@ -28,7 +28,7 @@ class FiercePublisher
     private ?string $tel = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    private ?string $mail = null;
+    private ?string $email = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $postalCode = null;
@@ -105,14 +105,14 @@ class FiercePublisher
         return $this;
     }
 
-    public function getMail(): ?string
+    public function getEmail(): ?string
     {
-        return $this->mail;
+        return $this->email;
     }
 
-    public function setMail(?string $mail): static
+    public function setEmail(?string $email): static
     {
-        $this->mail = $mail;
+        $this->email = $email;
         return $this;
     }
 

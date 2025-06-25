@@ -27,14 +27,16 @@ class WonderfullBookRepository extends ServiceEntityRepository
      */
     public function findWithPaginationAndSearch(int $page, int $limit, ?string $searchTerm = null): Paginator
     {
-        $queryBuilder = $this->createQueryBuilder('w');
+        $queryBuilder = $this->createQueryBuilder('w')
+                             ->leftJoin('w.fiercePublishers', 'p');
 
         if ($searchTerm) {
             $queryBuilder
-                ->where('w.title LIKE :searchTerm')
-                ->orWhere('w.authorFirstName LIKE :searchTerm')
-                ->orWhere('w.authorLastName LIKE :searchTerm')
-                ->setParameter('searchTerm', '%' . $searchTerm . '%');
+                ->where('LOWER(w.title) LIKE LOWER(:searchTerm)')
+                ->orWhere('LOWER(w.authorFirstName) LIKE LOWER(:searchTerm)')
+                ->orWhere('LOWER(w.authorLastName) LIKE LOWER(:searchTerm)')
+                ->orWhere('LOWER(p.name) LIKE LOWER(:searchTerm)')
+                ->setParameter('searchTerm', '%' . strtolower($searchTerm) . '%');
         }
 
         $queryBuilder

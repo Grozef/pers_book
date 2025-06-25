@@ -1,0 +1,243 @@
+App\Entity\AstonishingVideo:
+    properties:
+        title:
+            - NotBlank: { message: "Le titre est requis." }
+            - Length:
+                max: 255
+                maxMessage: "Le titre ne peut pas dépasser {{ limit }} caractères."
+        authorFirstName:
+            - NotBlank: { message: "Le prénom de l'auteur est requis." }
+            - Length:
+                max: 255
+                maxMessage: "Le prénom de l'auteur ne peut pas dépasser {{ limit }} caractères."
+        authorLastName:
+            - NotBlank: { message: "Le nom de l'auteur est requis." }
+            - Length:
+                max: 255
+                maxMessage: "Le nom de l'auteur ne peut pas dépasser {{ limit }} caractères."
+        rating:
+            - Type:
+                type: integer
+                message: "La note doit être un entier."
+            - Range:
+                min: 1
+                max: 5
+                notInRangeMessage: "La note doit être entre {{ min }} et {{ max }}."
+        isPublic:
+            - NotNull: { message: "La visibilité publique est requise." }
+            - Type:
+                type: boolean
+                message: "La visibilité publique doit être un booléen."
+        publishDate:
+            - Type:
+                type: DateTime
+                message: "La date de publication doit être une date valide."
+        publisher:
+            - Length:
+                max: 255
+                maxMessage: "L'éditeur ne peut pas dépasser {{ limit }} caractères."
+        filepath:
+            - Length:
+                max: 255
+                maxMessage: "Le chemin du fichier ne peut pas dépasser {{ limit }} caractères."
+        fiercePublishers:
+            - Valid: ~
+
+App\Entity\FiercePublisher:
+    properties:
+        name:
+            - NotBlank: { message: "Le nom de l'éditeur est requis." }
+            - Length:
+                max: 255
+                maxMessage: "Le nom de l'éditeur ne peut pas dépasser {{ limit }} caractères."
+        address:
+            - Length:
+                max: 255
+                maxMessage: "L'adresse ne peut pas dépasser {{ limit }} caractères."
+        tel:
+            - Length:
+                max: 255
+                maxMessage: "Le numéro de téléphone ne peut pas dépasser {{ limit }} caractères."
+        email:
+            - Length:
+                max: 255
+                maxMessage: "L'email ne peut pas dépasser {{ limit }} caractères."
+            - Email:
+                message: "L'email doit être valide."
+        postalCode:
+            - Length:
+                max: 255
+                maxMessage: "Le code postal ne peut pas dépasser {{ limit }} caractères."
+        country:
+            - Length:
+                max: 255
+                maxMessage: "Le pays ne peut pas dépasser {{ limit }} caractères."
+        astonishingVideos:
+            - Valid: ~
+        stunningImages:
+            - Valid: ~
+        wonderfullBooks:
+            - Valid: ~
+
+App\Entity\StunningImage:
+    properties:
+        title:
+            - NotBlank: { message: "Le titre est requis." }
+            - Length:
+                max: 255
+                maxMessage: "Le titre ne peut pas dépasser {{ limit }} caractères."
+        authorFirstName:
+            - NotBlank: { message: "Le prénom de l'auteur est requis." }
+            - Length:
+                max: 255
+                maxMessage: "Le prénom de l'auteur ne peut pas dépasser {{ limit }} caractères."
+        authorLastName:
+            - NotBlank: { message: "Le nom de l'auteur est requis." }
+            - Length:
+                max: 255
+                maxMessage: "Le nom de l'auteur ne peut pas dépasser {{ limit }} caractères."
+        rating:
+            - Type:
+                type: integer
+                message: "La note doit être un entier."
+            - Range:
+                min: 1
+                max: 5
+                notInRangeMessage: "La note doit être entre {{ min }} et {{ max }}."
+        isPublic:
+            - NotNull: { message: "La visibilité publique est requise." }
+            - Type:
+                type: boolean
+                message: "La visibilité publique doit être un booléen."
+        price:
+            - Type:
+                type: float
+                message: "Le prix doit être un nombre décimal."
+            - GreaterThanOrEqual:
+                value: 0
+                message: "Le prix ne peut pas être négatif."
+        publishedDate:
+            - Type:
+                type: DateTime
+                message: "La date de publication doit être une date."
+        publisher:
+            - Length:
+                max: 255
+                maxMessage: "L'éditeur ne peut pas dépasser {{ limit }} caractères."
+        filepath:
+            - Length:
+                max: 255
+                maxMessage: "Le chemin du fichier ne peut pas dépasser {{ limit }} caractères."
+        fiercePublishers:
+            - Valid: ~
+
+App\Entity\User:
+    properties:
+        email:
+            - NotBlank: { message: "L'email est requis." }
+            - Email: { message: "L'email doit être valide." }
+            - Length:
+                max: 255
+                maxMessage: "L'email ne peut pas dépasser {{ limit }} caractères."
+        password:
+            - NotBlank: { message: "Le mot de passe est requis." }
+            - Length:
+                min: 6
+                max: 255
+                minMessage: "Le mot de passe doit contenir au moins {{ limit }} caractères."
+                maxMessage: "Le mot de passe ne peut pas dépasser {{ limit }} caractères."
+        isActive:
+            - NotNull: { message: "Le statut actif est requis." }
+            - Type:
+                type: boolean
+                message: "Le statut actif doit être un booléen."
+        userInfo:
+            - NotNull: { message: "Les informations de l'utilisateur sont requises." }
+            - Valid: ~
+
+App\Entity\UserInfo:
+    properties:
+        firstName:
+            - NotBlank: { message: "Le prénom est requis." }
+            - Length:
+                max: 255
+                maxMessage: "Le prénom ne peut pas dépasser {{ limit }} caractères."
+        lastName:
+            - NotBlank: { message: "Le nom est requis." }
+            - Length:
+                max: 255
+                maxMessage: "Le nom ne peut pas dépasser {{ limit }} caractères."
+        address:
+            - Length:
+                max: 255
+                maxMessage: "L'adresse ne peut pas dépasser {{ limit }} caractères."
+        tel:
+            - Length:
+                max: 255
+                maxMessage: "Le numéro de téléphone ne peut pas dépasser {{ limit }} caractères."
+        postalCode:
+            - Length:
+                max: 255
+                maxMessage: "Le code postal ne peut pas dépasser {{ limit }} caractères."
+        country:
+            - Length:
+                max: 255
+                maxMessage: "Le pays ne peut pas dépasser {{ limit }} caractères."
+
+App\Entity\WonderfullBook:
+    properties:
+        title:
+            - NotBlank: { message: "Le titre est requis." }
+            - Length:
+                max: 255
+                maxMessage: "Le titre ne peut pas dépasser {{ limit }} caractères."
+        authorFirstName:
+            - NotBlank: { message: "Le prénom de l'auteur est requis." }
+            - Length:
+                max: 255
+                maxMessage: "Le prénom de l'auteur peut pas dépasser {{ limit }} caractères."
+        authorLastName:
+            - NotBlank: { message: "Le nom de l'auteur est requis." }
+            - Length:
+                max: 255
+                maxMessage: "Le nom de l'auteur ne peut pas dépasser {{ limit }} caractères."
+        rating:
+            - Type:
+                type: integer
+                message: "La note doit être un entier."
+            - Range:
+                min: 1
+                max: 5
+                notInRangeMessage: "La note doit être entre {{ min }} et {{ max }}."
+        isPublic:
+            - NotNull: { message: "La visibilité publique est requis." }
+            - Type:
+                type: boolean
+                message: "La visibilité publique doit être un booléen."
+        price:
+            - Type:
+                type: float
+                message: "Le prix doit être un nombre décimal."
+            - GreaterThanOrEqual:
+                value: 0
+                message: "Le prix ne peut pas être négatif."
+        publishedDate:
+            - Type:
+                type: DateTime
+                message: "La date de publication doit être une date valide."
+        genre:
+            - Length:
+                max: 255
+                maxMessage: "Le genre ne peut pas dépasser {{ limit }} caractères."
+        publisher:
+            - Length:
+                max: 255
+                maxMessage: "L'éditeur ne peut pas dépasser {{ limit }} caractères."
+        isbn:
+            - Length:
+                max: 255
+                maxMessage: "L'ISBN ne peut pas dépasser {{ limit }} caractères."
+            - Isbn:
+                message: "L'ISBN doit être valide."
+        fiercePublishers:
+            - Valid: ~

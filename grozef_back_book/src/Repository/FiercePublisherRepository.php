@@ -31,9 +31,11 @@ class FiercePublisherRepository extends ServiceEntityRepository
 
         if ($searchTerm) {
             $queryBuilder
-                ->where('f.name LIKE :searchTerm')
-                ->orWhere('f.address LIKE :searchTerm')
-                ->setParameter('searchTerm', '%' . $searchTerm . '%');
+                ->where('LOWER(f.name) LIKE LOWER(:searchTerm)')
+                ->orWhere('LOWER(f.address) LIKE LOWER(:searchTerm)')
+                ->orWhere('LOWER(f.email) LIKE LOWER(:searchTerm)')
+                ->orWhere('LOWER(f.country) LIKE LOWER(:searchTerm)')
+                ->setParameter('searchTerm', '%' . strtolower($searchTerm) . '%');
         }
 
         $queryBuilder

@@ -27,14 +27,16 @@ class AstonishingVideoRepository extends ServiceEntityRepository
      */
     public function findWithPaginationAndSearch(int $page, int $limit, ?string $searchTerm = null): Paginator
     {
-        $queryBuilder = $this->createQueryBuilder('a');
+        $queryBuilder = $this->createQueryBuilder('a')
+                             ->leftJoin('a.fiercePublishers', 'p');
 
         if ($searchTerm) {
             $queryBuilder
-                ->where('a.title LIKE :searchTerm')
-                ->orWhere('a.authorFirstName LIKE :searchTerm')
-                ->orWhere('a.authorLastName LIKE :searchTerm')
-                ->setParameter('searchTerm', '%' . $searchTerm . '%');
+                ->where('LOWER(a.title) LIKE LOWER(:searchTerm)')
+                ->orWhere('LOWER(a.authorFirstName) LIKE LOWER(:searchTerm)')
+                ->orWhere('LOWER(a.authorLastName) LIKE LOWER(:searchTerm)')
+                ->orWhere('LOWER(p.name) LIKE LOWER(:searchTerm)')
+                ->setParameter('searchTerm', '%' . strtolower($searchTerm) . '%');
         }
 
         $queryBuilder

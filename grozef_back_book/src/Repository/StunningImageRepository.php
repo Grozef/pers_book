@@ -27,14 +27,16 @@ class StunningImageRepository extends ServiceEntityRepository
      */
     public function findWithPaginationAndSearch(int $page, int $limit, ?string $searchTerm = null): Paginator
     {
-        $queryBuilder = $this->createQueryBuilder('s');
+        $queryBuilder = $this->createQueryBuilder('s')
+                             ->leftJoin('s.fiercePublishers', 'p');
 
         if ($searchTerm) {
             $queryBuilder
-                ->where('s.title LIKE :searchTerm')
-                ->orWhere('s.authorFirstName LIKE :searchTerm')
-                ->orWhere('s.authorLastName LIKE :searchTerm')
-                ->setParameter('searchTerm', '%' . $searchTerm . '%');
+                ->where('LOWER(s.title) LIKE LOWER(:searchTerm)')
+                ->orWhere('LOWER(s.authorFirstName) LIKE LOWER(:searchTerm)')
+                ->orWhere('LOWER(s.authorLastName) LIKE LOWER(:searchTerm)')
+                ->orWhere('LOWER(p.name) LIKE LOWER(:searchTerm)')
+                ->setParameter('searchTerm', '%' . strtolower($searchTerm) . '%');
         }
 
         $queryBuilder

@@ -22,7 +22,7 @@ class FiercePublisherCrudController extends AbstractCrudController
             TextField::new('name'),
             TextField::new('address'),
             TextField::new('tel'),
-            TextField::new('mail'),
+            TextField::new('email'),
             TextField::new('postalCode'),
             TextField::new('country'),
             AssociationField::new('astonishingVideos'),
@@ -39,7 +39,7 @@ class FiercePublisherCrudController extends AbstractCrudController
             'name',
             'address',
             'tel',
-            'mail',
+            'email',
             'postalCode',
             'country',
         ];

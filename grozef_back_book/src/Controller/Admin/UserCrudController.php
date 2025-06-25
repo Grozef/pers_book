@@ -20,7 +20,7 @@ class UserCrudController extends AbstractCrudController
     {
         return [
             IdField::new('id'),
-            TextField::new('mail'),
+            TextField::new('email'),
             TextField::new('password'),
             BooleanField::new('isActive'),
             AssociationField::new('userInfo')
@@ -34,7 +34,7 @@ class UserCrudController extends AbstractCrudController
     {
         return [
             'id',
-            'mail',
+            'email',
             'isActive',
             'userInfo.firstName',
             'userInfo.lastName',

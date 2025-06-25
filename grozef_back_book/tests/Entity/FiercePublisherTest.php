@@ -25,7 +25,7 @@ class FiercePublisherTest extends TestCase
         $this->assertNull($this->publisher->getName());
         $this->assertNull($this->publisher->getAddress());
         $this->assertNull($this->publisher->getTel());
-        $this->assertNull($this->publisher->getMail());
+        $this->assertNull($this->publisher->getEmail());
         $this->assertNull($this->publisher->getPostalCode());
         $this->assertNull($this->publisher->getCountry());
         $this->assertInstanceOf(ArrayCollection::class, $this->publisher->getAstonishingVideos());
@@ -60,10 +60,10 @@ class FiercePublisherTest extends TestCase
 
     public function testSetAndGetMail(): void
     {
-        $this->publisher->setMail('test@example.com');
-        $this->assertSame('test@example.com', $this->publisher->getMail());
-        $this->publisher->setMail(null);
-        $this->assertNull($this->publisher->getMail());
+        $this->publisher->setEmail('test@example.com');
+        $this->assertSame('test@example.com', $this->publisher->getEmail());
+        $this->publisher->setEmail(null);
+        $this->assertNull($this->publisher->getEmail());
     }
 
     public function testSetAndGetPostalCode(): void
