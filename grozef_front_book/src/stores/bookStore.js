@@ -1,6 +1,6 @@
-// src/stores/bookStore.js
 import { defineStore } from 'pinia'
 import api from '/services/api.js'
+import axios from 'axios'
 
 export const useBookStore = defineStore('book', {
   state: () => ({
@@ -23,11 +23,31 @@ export const useBookStore = defineStore('book', {
             search: this.search
           }
         })
-        this.books = response.data.data
+        this.books = await Promise.all(
+          response.data.data.map(async (book) => {
+            const bookDetails = await this.fetchBookDetails(book.isbn)
+            return {
+              ...book,
+              cover: bookDetails.cover || null
+            }
+          })
+        )
         this.pagination = response.data.pagination
         return { success: true }
       } catch (error) {
         return { success: false, error: error.response?.data?.errors || { general: 'Erreur lors du chargement des livres' } }
+      }
+    },
+    async fetchBookDetails(isbn) {
+      try {
+        const response = await axios.get(`https://openlibrary.org/api/books?bibkeys=ISBN:${isbn}&format=json&jscmd=data`)
+        const data = response.data[`ISBN:${isbn}`]
+        return {
+          cover: data?.cover?.medium || null
+        }
+      } catch (error) {
+        console.error('Erreur lors de la récupération des détails du livre:', error)
+        return { cover: null }
       }
     },
     async createBook(data) {
