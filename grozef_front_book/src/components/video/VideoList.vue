@@ -1,9 +1,9 @@
 <!-- src/components/video/VideoList.vue -->
 <template>
-  <div>
-    <h2>Vidéos</h2>
+  <div class="p-6">
+    <h2 class="text-2xl font-bold mb-4">Vidéos</h2>
 
-    <div v-if="Object.keys(errors).length" class="alert alert-danger">
+    <div v-if="Object.keys(errors).length" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
       <ul>
         <li v-for="(error, field) in errors" :key="field">{{ field }}: {{ error }}</li>
       </ul>
@@ -11,37 +11,56 @@
 
     <SearchBar @search="handleSearch" />
 
-    <table class="table table-striped table-hover">
-      <thead>
-        <tr>
-          <th v-for="field in fields" :key="field.key">{{ field.label }}</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="video in videoStore.videos" :key="video.id">
-          <td>{{ video.id }}</td>
-          <td>{{ video.title }}</td>
-          <td>{{ video.authorFirstName }}</td>
-          <td>{{ video.authorLastName }}</td>
-          <td>{{ video.rating }}</td>
-          <td>{{ video.isPublic ? 'Oui' : 'Non' }}</td>
-          <td>{{ video.publishDate }}</td>
-          <td>{{ video.publisher }}</td>
-          <td>
-            <button class="btn btn-sm btn-primary" @click="editVideo(video)">Modifier</button>
-            <button class="btn btn-sm btn-danger" @click="deleteVideo(video.id)">Supprimer</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div v-for="video in videoStore.videos" :key="video.id" class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="p-4">
+          <h3 class="text-lg font-semibold mb-2">{{ video.title }}</h3>
+          <p class="text-gray-600 mb-1">
+            <span class="font-medium">Auteur:</span> {{ video.authorFirstName }} {{ video.authorLastName }}
+          </p>
+          <p class="text-gray-600 mb-1">
+            <span class="font-medium">Note:</span> {{ video.rating }}/5
+          </p>
+          <p class="text-gray-600 mb-1">
+            <span class="font-medium">Public:</span> {{ video.isPublic ? 'Oui' : 'Non' }}
+          </p>
+          <p class="text-gray-600 mb-1">
+            <span class="font-medium">Date:</span> {{ video.publishDate }}
+          </p>
+          <p class="text-gray-600 mb-4">
+            <span class="font-medium">Éditeur:</span> {{ video.publisher }}
+          </p>
+          <div class="flex gap-2">
+            <button
+              class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-sm transition-colors"
+              @click="editVideo(video)"
+            >
+              Modifier
+            </button>
+            <button
+              class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded text-sm transition-colors"
+              @click="deleteVideo(video.id)"
+            >
+              Supprimer
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <ThePagination
       v-model:currentPage="videoStore.pagination.current_page"
       :total-items="videoStore.pagination.total_items"
       :items-per-page="videoStore.pagination.items_per_page"
+      class="mt-6"
     />
 
-    <button class="btn btn-success" @click="showCreateModal">Ajouter une vidéo</button>
+    <button
+      class="mt-6 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded transition-colors"
+      @click="showCreateModal"
+    >
+      Ajouter une vidéo
+    </button>
 
     <VideoForm
       v-if="showModal"
@@ -139,70 +158,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 1rem;
-}
-
-.table th,
-.table td {
-  padding: 0.5rem;
-  border: 1px solid #ddd;
-  text-align: left;
-}
-
-.table-striped tbody tr:nth-child(odd) {
-  background-color: #f9f9f9;
-}
-
-.table-hover tbody tr:hover {
-  background-color: #f1f1f1;
-}
-
-.btn {
-  padding: 0.25em 0.5em;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.875rem;
-  color: white;
-  margin-right: 0.3rem;
-}
-
-.btn-primary {
-  background-color: #007bff;
-}
-
-.btn-primary:hover {
-  background-color: #0056b3;
-}
-
-.btn-danger {
-  background-color: #dc3545;
-}
-
-.btn-danger:hover {
-  background-color: #a71d2a;
-}
-
-.btn-success {
-  background-color: #28a745;
-  padding: 0.4em 0.8em;
-}
-
-.btn-success:hover {
-  background-color: #1c7430;
-}
-
-.alert {
-  padding: 1rem;
-  margin-bottom: 1rem;
-  border-radius: 4px;
-  color: #721c24;
-  background-color: #f8d7da;
-  border: 1px solid #f5c6cb;
-}
-</style>

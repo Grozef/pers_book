@@ -1,9 +1,9 @@
 <!-- src/components/publisher/PublisherList.vue -->
 <template>
-  <div class="publisher-list">
-    <h2>Éditeurs</h2>
+  <div class="p-6 max-w-7xl mx-auto">
+    <h2 class="text-2xl font-bold mb-4">Éditeurs</h2>
 
-    <div v-if="hasErrors" class="alert alert-danger">
+    <div v-if="hasErrors" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
       <ul>
         <li v-for="(error, field) in errors" :key="field">{{ field }} : {{ error }}</li>
       </ul>
@@ -14,84 +14,151 @@
       placeholder="Rechercher..."
       v-model="searchTerm"
       @input="handleSearch"
-      class="search-input"
+      class="w-full p-2 mb-4 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
     />
 
-    <table class="table">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Nom</th>
-          <th>Adresse</th>
-          <th>Email</th>
-          <th>Pays</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="publisher in paginatedPublishers" :key="publisher.id">
-          <td>{{ publisher.id }}</td>
-          <td>{{ publisher.name }}</td>
-          <td>{{ publisher.address }}</td>
-          <td>{{ publisher.mail }}</td>
-          <td>{{ publisher.country }}</td>
-          <td>
-            <button @click="editPublisher(publisher)">Modifier</button>
-            <button @click="deletePublisher(publisher.id)">Supprimer</button>
-          </td>
-        </tr>
-        <tr v-if="paginatedPublishers.length === 0">
-          <td colspan="6" class="text-center">Aucun éditeur trouvé.</td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div v-for="publisher in publisherStore.publishers" :key="publisher.id" class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="p-4">
+          <h3 class="text-lg font-semibold mb-2">{{ publisher.name }}</h3>
+          <p class="text-gray-600 mb-1">
+            <span class="font-medium">Adresse:</span> {{ publisher.address }}
+          </p>
+          <p class="text-gray-600 mb-1">
+            <span class="font-medium">Email:</span> {{ publisher.email }}
+          </p>
+          <p class="text-gray-600 mb-1">
+            <span class="font-medium">Pays:</span> {{ publisher.country }}
+          </p>
+          <p class="text-gray-600 mb-1">
+            <span class="font-medium">Téléphone:</span> {{ publisher.tel }}
+          </p>
+          <p class="text-gray-600 mb-1">
+            <span class="font-medium">Code postal:</span> {{ publisher.postalCode }}
+          </p>
+          <div class="text-gray-600 mb-4">
+            <span class="font-medium">Vidéos:</span>
+            <span v-if="publisher.videos?.length">
+              <router-link
+                v-for="videoId in publisher.videos"
+                :key="videoId"
+                :to="`/videos/${videoId}`"
+                class="text-blue-500 hover:underline mx-1"
+              >
+                {{ videoId }}
+              </router-link>
+            </span>
+            <span v-else class="italic text-gray-500">Aucune</span>
+          </div>
+          <div class="text-gray-600 mb-4">
+            <span class="font-medium">Images:</span>
+            <span v-if="publisher.images?.length">
+              <router-link
+                v-for="imageId in publisher.images"
+                :key="imageId"
+                :to="`/images/${imageId}`"
+                class="text-blue-500 hover:underline mx-1"
+              >
+                {{ imageId }}
+              </router-link>
+            </span>
+            <span v-else class="italic text-gray-500">Aucune</span>
+          </div>
+          <div class="text-gray-600 mb-4">
+            <span class="font-medium">Livres:</span>
+            <span v-if="publisher.books?.length">
+              <router-link
+                v-for="bookId in publisher.books"
+                :key="bookId"
+                :to="`/books/${bookId}`"
+                class="text-blue-500 hover:underline mx-1"
+              >
+                {{ bookId }}
+              </router-link>
+            </span>
+            <span v-else class="italic text-gray-500">Aucune</span>
+          </div>
+          <div class="flex gap-2">
+            <button
+              class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-sm transition-colors"
+              @click="editPublisher(publisher)"
+            >
+              Modifier
+            </button>
+            <button
+              class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded text-sm transition-colors"
+              @click="deletePublisher(publisher.id)"
+            >
+              Supprimer
+            </button>
+          </div>
+        </div>
+      </div>
+      <div v-if="publisherStore.publishers.length === 0" class="col-span-full text-center text-gray-500 italic">
+        Aucun éditeur trouvé.
+      </div>
+    </div>
 
-    <div class="pagination">
+    <div class="flex justify-center items-center gap-4 mt-6">
       <button
-        :disabled="currentPage === 1"
-        @click="changePage(currentPage - 1)"
+        :disabled="publisherStore.pagination.current_page === 1"
+        @click="changePage(publisherStore.pagination.current_page - 1)"
+        class="px-4 py-2 bg-gray-200 text-gray-700 rounded disabled:opacity-50 disabled:cursor-not-allowed"
       >
         Précédent
       </button>
-      <span>Page {{ currentPage }} / {{ totalPages }}</span>
+      <span class="text-gray-700">Page {{ publisherStore.pagination.current_page }} / {{ publisherStore.pagination.total_pages }}</span>
       <button
-        :disabled="currentPage === totalPages"
-        @click="changePage(currentPage + 1)"
+        :disabled="publisherStore.pagination.current_page === publisherStore.pagination.total_pages"
+        @click="changePage(publisherStore.pagination.current_page + 1)"
+        class="px-4 py-2 bg-gray-200 text-gray-700 rounded disabled:opacity-50 disabled:cursor-not-allowed"
       >
         Suivant
       </button>
     </div>
 
-    <button class="btn-add" @click="showCreateModal">Ajouter un éditeur</button>
+    <button
+      class="mt-6 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded transition-colors"
+      @click="showCreateModal"
+    >
+      Ajouter un éditeur
+    </button>
 
-    <!-- Modal simple -->
-    <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
-      <div class="modal-content">
-        <h3>Formulaire Éditeur</h3>
+    <div v-if="showModal" class="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-[1000]" @click.self="closeModal">
+      <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
+        <h3 class="text-lg font-semibold mb-4 text-center">Formulaire Éditeur</h3>
         <form @submit.prevent="savePublisher">
-          <label>
+          <label class="block mb-3 font-semibold">
             Nom
-            <input type="text" v-model="form.name" required />
+            <input type="text" v-model="form.name" required class="w-full p-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" />
           </label>
-
-          <label>
+          <label class="block mb-3 font-semibold">
             Adresse
-            <input type="text" v-model="form.address" required />
+            <input type="text" v-model="form.address" required class="w-full p-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" />
           </label>
-
-          <label>
+          <label class="block mb-3 font-semibold">
             Email
-            <input type="email" v-model="form.mail" required />
+            <input type="email" v-model="form.mail" required class="w-full p-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" />
           </label>
-
-          <label>
+          <label class="block mb-3 font-semibold">
             Pays
-            <input type="text" v-model="form.country" required />
+            <input type="text" v-model="form.country" required class="w-full p-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" />
           </label>
-
-          <div class="modal-actions">
-            <button type="submit">Sauvegarder</button>
-            <button type="button" @click="closeModal">Annuler</button>
+          <label class="block mb-3 font-semibold">
+            Téléphone
+            <input type="text" v-model="form.tel" class="w-full p-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          </label>
+          <label class="block mb-3 font-semibold">
+            Code postal
+            <input type="text" v-model="form.postalCode" class="w-full p-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          </label>
+          <div class="flex justify-between mt-4">
+            <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded transition-colors">
+              Sauvegarder
+            </button>
+            <button type="button" @click="closeModal" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded transition-colors">
+              Annuler
+            </button>
           </div>
         </form>
       </div>
@@ -103,28 +170,29 @@
 import { ref, reactive, computed, watch, onMounted } from 'vue'
 import { useAppStore } from '@/stores/appStore'
 import { usePublisherStore } from '@/stores/publisherStore'
+import { useRouter } from 'vue-router' // Ajout pour gérer les liens
 
 export default {
   setup() {
     const appStore = useAppStore()
     const publisherStore = usePublisherStore()
+    const router = useRouter()
 
     const searchTerm = ref('')
-    const currentPage = ref(1)
-    const itemsPerPage = 10
-
     const showModal = ref(false)
     const selectedPublisher = ref(null)
     const form = reactive({
       name: '',
       address: '',
       mail: '',
-      country: ''
+      country: '',
+      tel: '',
+      postalCode: ''
     })
 
     // Chargement initial
     const fetchPublishers = async () => {
-      const result = await publisherStore.fetchPublishers()
+      const result = await publisherStore.fetchPublishers(publisherStore.pagination.items_per_page)
       if (!result.success) {
         appStore.setErrors(result.error)
       }
@@ -135,25 +203,9 @@ export default {
     // Recherche
     watch(searchTerm, async (newSearch) => {
       publisherStore.setSearch(newSearch)
-      currentPage.value = 1
+      publisherStore.setPage(1)
       await fetchPublishers()
     })
-
-    // Pagination calculée
-    const totalItems = computed(() => publisherStore.publishers.length)
-    const totalPages = computed(() =>
-      Math.ceil(totalItems.value / itemsPerPage)
-    )
-    const paginatedPublishers = computed(() => {
-      const start = (currentPage.value - 1) * itemsPerPage
-      return publisherStore.publishers.slice(start, start + itemsPerPage)
-    })
-
-    function changePage(page) {
-      if (page >= 1 && page <= totalPages.value) {
-        currentPage.value = page
-      }
-    }
 
     // Gestion erreurs affichage
     const errors = computed(() => appStore.errors)
@@ -162,7 +214,7 @@ export default {
     // Modale gestion
     function showCreateModal() {
       selectedPublisher.value = null
-      Object.assign(form, { name: '', address: '', mail: '', country: '' })
+      Object.assign(form, { name: '', address: '', mail: '', country: '', tel: '', postalCode: '' })
       showModal.value = true
       appStore.clearErrors()
     }
@@ -202,16 +254,21 @@ export default {
         if (result.success) {
           await fetchPublishers()
         } else {
+          // to avoid the error delete that shit when fixed
+          console.log(router)
           appStore.setErrors(result.error)
         }
       }
     }
 
+    async function changePage(page) {
+      publisherStore.setPage(page)
+      await fetchPublishers()
+    }
+
     return {
       searchTerm,
-      currentPage,
-      totalPages,
-      paginatedPublishers,
+      publisherStore,
       errors,
       hasErrors,
       showModal,
@@ -228,155 +285,4 @@ export default {
 </script>
 
 <style scoped>
-.publisher-list {
-  max-width: 900px;
-  margin: auto;
-  padding: 1em;
-}
-
-.alert {
-  background-color: #f8d7da;
-  color: #721c24;
-  padding: 1em;
-  margin-bottom: 1em;
-  border-radius: 4px;
-}
-
-.search-input {
-  width: 100%;
-  padding: 0.5em;
-  margin-bottom: 1em;
-  font-size: 1em;
-  box-sizing: border-box;
-}
-
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 1em;
-}
-
-.table th,
-.table td {
-  border: 1px solid #ccc;
-  padding: 0.5em;
-  text-align: left;
-}
-
-.table th {
-  background-color: #eee;
-}
-
-.text-center {
-  text-align: center;
-  font-style: italic;
-  color: #777;
-}
-
-.pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 1em;
-  margin-bottom: 1em;
-}
-
-.pagination button {
-  padding: 0.5em 1em;
-  cursor: pointer;
-}
-
-.pagination button:disabled {
-  cursor: default;
-  opacity: 0.5;
-}
-
-.btn-add {
-  display: block;
-  margin: 0 auto;
-  padding: 0.7em 1.2em;
-  font-size: 1em;
-  cursor: pointer;
-  background-color: #28a745;
-  border: none;
-  color: white;
-  border-radius: 4px;
-}
-
-.btn-add:hover {
-  background-color: #218838;
-}
-
-/* Modal simple */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0,0,0,0.4);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.modal-content {
-  background-color: white;
-  padding: 1.5em;
-  border-radius: 5px;
-  width: 320px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.25);
-}
-
-.modal-content h3 {
-  margin-top: 0;
-  margin-bottom: 1em;
-  font-size: 1.25em;
-  text-align: center;
-}
-
-.modal-content form label {
-  display: block;
-  margin-bottom: 0.75em;
-  font-weight: 600;
-}
-
-.modal-content form input {
-  width: 100%;
-  padding: 0.4em;
-  margin-top: 0.25em;
-  box-sizing: border-box;
-}
-
-.modal-actions {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 1em;
-}
-
-.modal-actions button {
-  padding: 0.5em 1em;
-  cursor: pointer;
-  border-radius: 3px;
-  border: none;
-}
-
-.modal-actions button[type="submit"] {
-  background-color: #007bff;
-  color: white;
-}
-
-.modal-actions button[type="submit"]:hover {
-  background-color: #0069d9;
-}
-
-.modal-actions button[type="button"] {
-  background-color: #6c757d;
-  color: white;
-}
-
-.modal-actions button[type="button"]:hover {
-  background-color: #5a6268;
-}
 </style>

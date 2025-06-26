@@ -56,10 +56,6 @@
       class="mt-6"
     />
 
-    <div class="bg-blue-500 text-white p-4">
-  Test Tailwind CSS
-</div>
-
     <button @click="showCreateModal" class="create-btn bg-green-500 text-white px-4 py-2 rounded mt-6 hover:bg-green-600">
       Ajouter un livre
     </button>

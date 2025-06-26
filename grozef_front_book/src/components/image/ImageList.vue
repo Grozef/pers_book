@@ -1,8 +1,9 @@
+<!-- src/components/image/ImageList.vue -->
 <template>
-  <div>
-    <h2>Images</h2>
+  <div class="p-6">
+    <h2 class="text-2xl font-bold mb-4">Images</h2>
 
-    <div v-if="Object.keys(errors).length" class="alert alert-danger">
+    <div v-if="Object.keys(errors).length" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
       <ul>
         <li v-for="(error, field) in errors" :key="field">{{ field }}: {{ error }}</li>
       </ul>
@@ -10,37 +11,56 @@
 
     <SearchBar @search="handleSearch" />
 
-    <table class="table">
-      <thead>
-        <tr>
-          <th v-for="field in fields" :key="field.key">{{ field.label }}</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="image in imageStore.images" :key="image.id">
-          <td>{{ image.id }}</td>
-          <td>{{ image.title }}</td>
-          <td>{{ image.authorFirstName }}</td>
-          <td>{{ image.authorLastName }}</td>
-          <td>{{ image.rating }}</td>
-          <td>{{ image.isPublic ? 'Oui' : 'Non' }}</td>
-          <td>{{ image.publishDate }}</td>
-          <td>{{ image.publisher }}</td>
-          <td>
-            <button class="btn btn-primary btn-sm" @click="editImage(image)">Modifier</button>
-            <button class="btn btn-danger btn-sm" @click="deleteImage(image.id)">Supprimer</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div v-for="image in imageStore.images" :key="image.id" class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="p-4">
+          <h3 class="text-lg font-semibold mb-2">{{ image.title }}</h3>
+          <p class="text-gray-600 mb-1">
+            <span class="font-medium">Auteur:</span> {{ image.authorFirstName }} {{ image.authorLastName }}
+          </p>
+          <p class="text-gray-600 mb-1">
+            <span class="font-medium">Note:</span> {{ image.rating }}/5
+          </p>
+          <p class="text-gray-600 mb-1">
+            <span class="font-medium">Public:</span> {{ image.isPublic ? 'Oui' : 'Non' }}
+          </p>
+          <p class="text-gray-600 mb-1">
+            <span class="font-medium">Date:</span> {{ image.publishDate }}
+          </p>
+          <p class="text-gray-600 mb-4">
+            <span class="font-medium">Éditeur:</span> {{ image.publisher }}
+          </p>
+          <div class="flex gap-2">
+            <button
+              class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-sm transition-colors"
+              @click="editImage(image)"
+            >
+              Modifier
+            </button>
+            <button
+              class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded text-sm transition-colors"
+              @click="deleteImage(image.id)"
+            >
+              Supprimer
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <ThePagination
       v-model:currentPage="imageStore.pagination.current_page"
       :total-items="imageStore.pagination.total_items"
       :items-per-page="imageStore.pagination.items_per_page"
+      class="mt-6"
     />
 
-    <button class="btn btn-success" @click="showCreateModal">Ajouter une image</button>
+    <button
+      class="mt-6 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded transition-colors"
+      @click="showCreateModal"
+    >
+      Ajouter une image
+    </button>
 
     <ImageForm
       v-if="showModal"
@@ -138,60 +158,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 1rem;
-}
-.table th, .table td {
-  border: 1px solid #ddd;
-  padding: 0.5rem;
-  text-align: left;
-}
-.table th {
-  background-color: #f4f4f4;
-}
-.btn {
-  cursor: pointer;
-  border: none;
-  border-radius: 4px;
-  padding: 0.3rem 0.6rem;
-  font-size: 0.875rem;
-  margin-right: 0.3rem;
-  color: white;
-}
-.btn-sm {
-  font-size: 0.75rem;
-  padding: 0.2rem 0.4rem;
-}
-.btn-primary {
-  background-color: #007bff;
-}
-.btn-primary:hover {
-  background-color: #0056b3;
-}
-.btn-danger {
-  background-color: #dc3545;
-}
-.btn-danger:hover {
-  background-color: #a71d2a;
-}
-.btn-success {
-  background-color: #28a745;
-  margin-top: 1rem;
-}
-.btn-success:hover {
-  background-color: #1e7e34;
-}
-.alert {
-  padding: 0.75rem 1rem;
-  border-radius: 4px;
-  margin-bottom: 1rem;
-}
-.alert-danger {
-  background-color: #f8d7da;
-  color: #721c24;
-}
-</style>
